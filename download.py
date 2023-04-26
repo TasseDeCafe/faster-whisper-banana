@@ -7,7 +7,7 @@ def download_model():
     model_size = "tiny"
 
     # Run on GPU with FP16
-    WhisperModel(model_size, device="cpu", compute_type="int8", download_root="models")
+    WhisperModel(model_size, device="cpu", compute_type="int8")
 
 if __name__ == "__main__":
     download_model()

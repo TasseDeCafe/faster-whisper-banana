@@ -9,7 +9,7 @@ app = Potassium("potassium_app_faster_whisper")
 # @app.init runs at startup, and loads models into the app's context
 @app.init
 def init():
-    model = WhisperModel(model_size, device="cpu", compute_type="int8", download_root="models")
+    model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
     context = {
         "model": model
