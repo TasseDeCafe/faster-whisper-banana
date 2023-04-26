@@ -1,33 +1,40 @@
 from potassium import Potassium, Request, Response
+from faster_whisper import WhisperModel
 
-from transformers import pipeline
-import torch
+model_size = "tiny"
 
-app = Potassium("my_app")
+app = Potassium("potassium_app_faster_whisper")
+
 
 # @app.init runs at startup, and loads models into the app's context
 @app.init
 def init():
-    device = 0 if torch.cuda.is_available() else -1
-    model = pipeline('fill-mask', model='bert-base-uncased', device=device)
-   
+    model = WhisperModel(model_size, device="cpu", compute_type="int8", download_root="models")
+
     context = {
         "model": model
     }
-
     return context
+
 
 # @app.handler runs for every call
 @app.handler()
 def handler(context: dict, request: Request) -> Response:
-    prompt = request.json.get("prompt")
     model = context.get("model")
-    outputs = model(prompt)
+    segments, info = model.transcribe("first_30_seconds.mp3", beam_size=5, vad_filter=True)
+
+    print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+
+    segments_list = []
+    for segment in segments:
+        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+        segments_list.append(segment.text)
 
     return Response(
-        json = {"outputs": outputs[0]}, 
+        json={"transcription": segments_list},
         status=200
     )
+
 
 if __name__ == "__main__":
     app.serve()

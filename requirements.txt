@@ -1,3 +1,5 @@
 potassium
 torch
 transformers
+faster-whisper
+ffmpeg-python
